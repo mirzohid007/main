@@ -1,1 +1,2415 @@
+<!doctype html>
+<html lang="uz">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Kamoliddin domla quiz tizimi</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+            .container {
+                background: white;
+                border-radius: 20px;
+                padding: 40px;
+                max-width: 800px;
+                width: 100%;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            .header h1 {
+                color: #333;
+                font-size: 28px;
+                margin-bottom: 10px;
+            }
+            .header p {
+                color: #666;
+                font-size: 16px;
+            }
+            .screen {
+                display: none;
+            }
+            .screen.active {
+                display: block;
+            }
+            .home-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                margin-top: 30px;
+            }
+            .btn {
+                padding: 15px 30px;
+                border: none;
+                border-radius: 10px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: all 0.3s;
+                font-weight: 600;
+            }
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            }
+            .btn-secondary {
+                background: #f0f0f0;
+                color: #333;
+            }
+            .btn-secondary:hover {
+                background: #e0e0e0;
+            }
+            .input-group {
+                margin-bottom: 20px;
+            }
+            .input-group label {
+                display: block;
+                margin-bottom: 8px;
+                color: #333;
+                font-weight: 600;
+            }
+            .input-group input {
+                width: 100%;
+                padding: 12px 15px;
+                border: 2px solid #ddd;
+                border-radius: 10px;
+                font-size: 16px;
+                transition: border-color 0.3s;
+            }
+            .input-group input:focus {
+                outline: none;
+                border-color: #667eea;
+            }
+            .timer {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                padding: 15px 25px;
+                border-radius: 15px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+                font-size: 20px;
+                font-weight: bold;
+                color: #333;
+                z-index: 1000;
+            }
+            .timer.warning {
+                color: #ff6b6b;
+            }
+            .timer.danger {
+                color: #ff0000;
+                animation: pulse 1s infinite;
+            }
+            @keyframes pulse {
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+            .progress-bar {
+                width: 100%;
+                height: 8px;
+                background: #eee;
+                border-radius: 4px;
+                margin-bottom: 20px;
+                overflow: hidden;
+            }
+            .progress-fill {
+                height: 100%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 4px;
+                transition: width 0.3s;
+            }
+            .question-card {
+                background: #f8f9fa;
+                border-radius: 15px;
+                padding: 25px;
+                margin-bottom: 20px;
+            }
+            .question-number {
+                color: #667eea;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+            .question-text {
+                font-size: 17px;
+                color: #333;
+                margin-bottom: 20px;
+                line-height: 1.6;
+            }
+            .options {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+            .option {
+                padding: 15px 20px;
+                border: 2px solid #ddd;
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .option:hover {
+                border-color: #667eea;
+                background: #f0f0ff;
+            }
+            .option.selected {
+                border-color: #667eea;
+                background: #e8e8ff;
+            }
+            .option-letter {
+                font-weight: bold;
+                color: #667eea;
+                min-width: 25px;
+            }
+            .nav-buttons {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 30px;
+            }
+            .result-card {
+                text-align: center;
+                padding: 30px;
+            }
+            .result-icon {
+                font-size: 60px;
+                margin-bottom: 20px;
+            }
+            .result-score {
+                font-size: 48px;
+                font-weight: bold;
+                color: #667eea;
+                margin: 20px 0;
+            }
+            .result-message {
+                font-size: 18px;
+                color: #666;
+                margin-bottom: 10px;
+            }
+            .result-details {
+                margin-top: 20px;
+                padding: 20px;
+                background: #f8f9fa;
+                border-radius: 15px;
+                text-align: left;
+            }
+            .result-details p {
+                margin: 8px 0;
+                color: #333;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+                color: #666;
+            }
+            .footer a {
+                color: #667eea;
+                text-decoration: none;
+                font-weight: 600;
+            }
+            .hidden {
+                display: none !important;
+            }
+            @media (max-width: 600px) {
+                .container {
+                    padding: 20px;
+                }
+                .header h1 {
+                    font-size: 22px;
+                }
+                .timer {
+                    font-size: 16px;
+                    padding: 10px 15px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="timer hidden" id="timer">50:00</div>
+        <div class="container">
+            <div class="screen active" id="homeScreen">
+                <div class="header">
+                    <h1>Kamoliddin domla quiz tizimi</h1>
+                    <p>Fizika fanidan onlayn testlar</p>
+                </div>
+                <div class="home-buttons">
+                    <button
+                        class="btn btn-primary"
+                        onclick="showScreen('passwordScreen1')"
+                    >
+                        1-Bo'lim: MEXANIKA va MOLEKULYAR FIZIKA
+                    </button>
+                    <button
+                        class="btn btn-primary"
+                        onclick="showScreen('passwordScreen2')"
+                    >
+                        2-Bo'lim: ELEKTR, OPTIKA, ATOM va YADRO
+                    </button>
+                </div>
+            </div>
+            <div class="screen" id="passwordScreen1">
+                <div class="header">
+                    <h1>1-Bo'lim</h1>
+                    <p>MEXANIKA va MOLEKULYAR FIZIKA</p>
+                </div>
+                <div class="input-group">
+                    <label>Parolni kiriting:</label>
+                    <input
+                        type="password"
+                        id="password1"
+                        placeholder="Parolni kiriting"
+                    />
+                </div>
+                <div
+                    id="error1"
+                    style="color: red; margin-bottom: 15px; display: none"
+                >
+                    Noto'g'ri parol!
+                </div>
+                <div class="home-buttons">
+                    <button class="btn btn-primary" onclick="checkPassword(1)">
+                        Kirish
+                    </button>
+                    <button
+                        class="btn btn-secondary"
+                        onclick="showScreen('homeScreen')"
+                    >
+                        Orqaga
+                    </button>
+                </div>
+            </div>
+            <div class="screen" id="passwordScreen2">
+                <div class="header">
+                    <h1>2-Bo'lim</h1>
+                    <p>ELEKTR, OPTIKA, ATOM va YADRO FIZIKASI</p>
+                </div>
+                <div class="input-group">
+                    <label>Parolni kiriting:</label>
+                    <input
+                        type="password"
+                        id="password2"
+                        placeholder="Parolni kiriting"
+                    />
+                </div>
+                <div
+                    id="error2"
+                    style="color: red; margin-bottom: 15px; display: none"
+                >
+                    Noto'g'ri parol!
+                </div>
+                <div class="home-buttons">
+                    <button class="btn btn-primary" onclick="checkPassword(2)">
+                        Kirish
+                    </button>
+                    <button
+                        class="btn btn-secondary"
+                        onclick="showScreen('homeScreen')"
+                    >
+                        Orqaga
+                    </button>
+                </div>
+            </div>
+            <div class="screen" id="nameScreen">
+                <div class="header">
+                    <h1>O'quvchi ma'lumotlari</h1>
+                    <p id="sectionNameDisplay"></p>
+                </div>
+                <div class="input-group">
+                    <label>Ismingiz:</label>
+                    <input
+                        type="text"
+                        id="studentName"
+                        placeholder="Ismingizni kiriting"
+                    />
+                </div>
+                <div class="input-group">
+                    <label>Familiyangiz:</label>
+                    <input
+                        type="text"
+                        id="studentSurname"
+                        placeholder="Familiyangizni kiriting"
+                    />
+                </div>
+                <div
+                    id="nameError"
+                    style="color: red; margin-bottom: 15px; display: none"
+                >
+                    Iltimos, ism va familiyangizni kiriting!
+                </div>
+                <div class="home-buttons">
+                    <button class="btn btn-primary" onclick="startQuiz()">
+                        Testni boshlash
+                    </button>
+                    <button
+                        class="btn btn-secondary"
+                        onclick="showScreen('homeScreen')"
+                    >
+                        Bosh sahifa
+                    </button>
+                </div>
+            </div>
+            <div class="screen" id="quizScreen">
+                <div class="progress-bar">
+                    <div
+                        class="progress-fill"
+                        id="progressBar"
+                        style="width: 0%"
+                    ></div>
+                </div>
+                <div class="question-card">
+                    <div class="question-number" id="questionNumber">
+                        Savol 1/50
+                    </div>
+                    <div class="question-text" id="questionText"></div>
+                    <div class="options" id="optionsContainer"></div>
+                </div>
+                <div class="nav-buttons">
+                    <!--<button
+                        class="btn btn-secondary"
+                        id="prevBtn"
+                        onclick="prevQuestion()"
+                    >
+                        Oldingi
+                    </button>-->
+                    <button
+                        class="btn btn-primary"
+                        id="nextBtn"
+                        onclick="nextQuestion()"
+                    >
+                        Keyingi
+                    </button>
+                </div>
+            </div>
+            <div class="screen" id="resultScreen">
+                <div class="result-card">
+                    <div class="result-icon">&#127942;</div>
+                    <div class="result-message" id="resultName"></div>
+                    <div class="result-score" id="resultScore"></div>
+                    <div class="result-message" id="resultMessage"></div>
+                    <div class="result-details" id="resultDetails"></div>
+                </div>
+                <div class="home-buttons">
+                    <button
+                        class="btn btn-primary"
+                        onclick="
+                            showScreen('homeScreen');
+                            resetQuiz();
+                        "
+                    >
+                        Bosh sahifa
+                    </button>
+                </div>
+            </div>
+            <div class="footer">
+                <p>
+                    Murojaat uchun:
+                    <a href="https://t.me/zokirov_0712" target="_blank"
+                        >@zokirov_0712</a
+                    >
+                    <br />
+                    &copy; 2026
+                </p>
+            </div>
+        </div>
+        <script>
+            const section1Questions = [
+                {
+                    question:
+                        "Jism fazodagi vaziyatining boshqa jismlarga nisbatan vaqt o'tishi bilan o'zgarishiga uning ... deyiladi. Nuqtalar o'rnini to'ldiring.",
+                    options: {
+                        A: "Traektoriya",
+                        B: "Yo'li",
+                        C: "Mexanik harakati",
+                        D: "Ko'chishi",
+                    },
+                    correct: "C",
+                },
+                {
+                    question: "Vaqtning asosiy o'lchov birligi qanday?",
+                    options: {
+                        A: "1 s",
+                        B: "1 min",
+                        C: "1 soat",
+                        D: "1 sutka",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Jism 5 m balandlikdan erkin tik ravishda tushib, qaytib sakraganda 3 m balandlikda ushlab olindi. Uning yo'li va ko'chishini hisoblang.",
+                    options: {
+                        A: "8 m ,  8 m",
+                        B: "8 m , 2 m",
+                        C: "2 m, 8 m",
+                        D: "8 m , 5 m",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Jism yo'lning yarmini 60 km/soat, qolgan yarmini 90 km/soat tezlikda bosib o'tdi. Uning butun yo'ldagi o'rtacha tezligini hisoblang.",
+                    options: {
+                        A: "36 km/soat",
+                        B: "75 km/soat",
+                        C: "80 km/soat",
+                        D: "72 km/soat",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Jism harakat vaqtining 1-yarmida 60 km/soat, qolgan vaqtda 90 km/soat tezlik bilan harakat qilgan. Uning butun vaqt davomidagi o'rtacha tezligini hisoblang.",
+                    options: {
+                        A: "36 km/soat",
+                        B: "75 km/soat",
+                        C: "80 km/soat",
+                        D: "72 km/soat",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Jismga 2 xil 5 m/s va 6 m/s tezlik berilmoqda, tezlik vektorlari orasidagi burchak 450 ga teng. Uning natijaviy tezligini hisoblang.   deb hisoblang.",
+                    options: {
+                        A: "10.14 m/s",
+                        B: "9.81 m/s",
+                        C: "12.3 m/s",
+                        D: "21.12 m/s",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Ikkita jism 5 m/s va 6 m/s tezlik bilan, bir-biriga 450 ostida o'tgan yo'llar bo'yicha harkat qilishmoqda. Ularning nisbiy tezligini hisoblang.  deb hisoblang.",
+                    options: {
+                        A: "4.2 m/s",
+                        B: "4.36 m/s",
+                        C: "3.4 m/s",
+                        D: "2.13 m/s",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Jismning harakat tenglamasi    ko'rinishga ega. Uning 2 s vaqt momentidagi tezligini hisoblang.",
+                    options: {
+                        A: "5 m/s",
+                        B: "15 m/s",
+                        C: "10 m/s",
+                        D: "25 m/s",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Jism tezligini vaqtga bog'liqligi v(t) = 3t + 2t2  m/s  ko'rinishga ega. Uning 4 s da bosib o'tadigan masofasini hisoblang.",
+                    options: {
+                        A: "69.45 m",
+                        B: "45.65 m",
+                        C: "66.66 m",
+                        D: "56.43 m",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Jism tezlanishining vaqtga bog'liqligi a(t) = 3t - t2  m/s2 ko'rinishga ega. Uning 2 s vaqt momentidagi tezligini hisoblang.",
+                    options: {
+                        A: "5/4 m/s2",
+                        B: "10/9 m/s2",
+                        C: "10/7 m/s2",
+                        D: "10/3 m/s2",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Jism 3 m radiusli aylana bo'ylab  burchak tezlanish bilan aylanmoqda. Uning tangensial tezlanishini hisoblang. (m/s2)",
+                    options: { A: "1.5", B: "2.5", C: "3.5", D: "4" },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Jism aylanma harakat qilmoda. Burchak tezlikning vaqtga bog'liqligi   ko'rinishga ega. Uning 5 s dagi burchak tezlanishini hisoblang.  (rad/s2)",
+                    options: { A: "10", B: "12", C: "20", D: "25" },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Jism 2.2 m/s2 tezlanish bilan tik yuqoriga harakat qilmoqda. Agar uning massasi 30 kg ga teng bo'lsa, uning o'zi turgan tayanchga berayotgan bosim kuchini hisoblang. g = 9.8 m/s2",
+                    options: { A: "300 N", B: "330 N", C: "360 N", D: "400 N" },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Ta'sir aks ta'sirni vujudga keltiradi va ular miqdor jihatdan teng va bir to'g'ri chiziq bo'ylab qarama-qarshi yo'nalgan bo'ladi. Bu .....",
+                    options: {
+                        A: "Nyutonning 1-qonuni",
+                        B: "Nyutonning 2-qonuni",
+                        C: "Nyutonning 3-qonuni",
+                        D: "Nyutonning 4-qonuni",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Jismga boshqa jismlar ta'sir qilib uning boshlang'ich xolatini o'zgartirmagunicha u o'zining nisbiy tinch yoki to'g'ri chiziqli tekis harakatli xolatini saqlaydi. Bu ....",
+                    options: {
+                        A: "Nyutonning 1-qonuni",
+                        B: "Nyutonning 2-qonuni",
+                        C: "Nyutonning 3-qonuni",
+                        D: "Nyutonning 4-qonuni",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Jismning boshqa jismlar bilan ta'sirlashish natijasida olgan tezlanishi unga ta'sir qilayotgan kuchga to'g'ri, jism massasiga esa teskari proporsional bo'ladi. Bu ....",
+                    options: {
+                        A: "Nyutonning 1-qonuni",
+                        B: "Nyutonning 2-qonuni",
+                        C: "Nyutonning 3-qonuni",
+                        D: "Nyutonning 4-qonuni",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Jismning massasi 2 kg va ishqalanish koeffitsienti 0.2 ga teng bo'lsa. Jismga ta'sir qilishi  mumkin bo'lgan ishqalanish kuchining maksimal qiymatini hisoblang. g = 10 m/s2",
+                    options: { A: "4 N", B: "6 N", C: "20 N", D: "10 N" },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Jismning massasi 5 kg va tezligi 5 m/s ga teng. Jismning impulsini hisoblang.",
+                    options: {
+                        A: "25 kg m/s",
+                        B: "30 kg m/s",
+                        C: "35 kg m/s",
+                        D: "40 kg m/s",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Jismga 40 N kuch 2 s davomida ta'sir qilsa jism impulsi qanchaga o'zgaradi?",
+                    options: { A: "40 Ns", B: "30 Ns", C: "20 Ns", D: "80 Ns" },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Massasi 20 kg bo'lgan jism 2 m/s tezlik bilan harakat qilib tinch turgan 30 kg bo'lgan jismga urildi va ular birgalikda harakat qildi. Ularning umumiy tezligini hisoblang.",
+                    options: {
+                        A: "0.5 m/s",
+                        B: "0.7 m/s",
+                        C: "0.8 m/s",
+                        D: "0.9 m/s",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Jismlarning massalari mos ravishda 2 va 3 kg ga teng. Ularning tezliklari esa 3 m/s va 2 m/s ga teng. Agar ular bir to'g'ri chiziq bo'ylab qarama-qarshi harakat qilib kelib to'qnashsa, ularning umumiy tezligi qanday bo'ladi?",
+                    options: { A: "1 m/s", B: "2 m/s", C: "3 m/s", D: "0 m/s" },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Jismga F= 40 N kuch 600 burchak ostida ta'sir qilib uni 20 m masofaga ko'chirdi. Kuchning bu yo'lda bajargan ishini hisoblang.",
+                    options: { A: "200 J", B: "20 J", C: "100 J", D: "400 J" },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Jismning massasi 2 kg va uning tezligi 100 m/s ga teng bo'lsa, uning kinetik energiyasini hisoblang.",
+                    options: { A: "10 kJ", B: "20 kJ", C: "30 kJ", D: "40 kJ" },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Jism yer sirtidan 300 m balandlikka ko'tarildi. Agar uning massasi 3 kg teng bo'lsa, uning potensial energiyasini hisoblang.",
+                    options: { A: "10 kJ", B: "9 kJ", C: "8 kJ", D: "5 kJ" },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "H = 20 m balandlikda 20 m/s tezlik bilan harakat qilib ketayotgan jismning to'liq energiyasini hisoblang. Jismning massasi 2 kg ga teng, g = 10 m/s2  deb hisoblang.",
+                    options: { A: "500 J", B: "600 J", C: "700 J", D: "800 J" },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Massasi 3 kg bo'lgan miltiqdan 10 g massali o'q 600 m/s tezlikda otilib chiqdi. Miltiqning olgan tezligini hisoblang.",
+                    options: {
+                        A: "2 m/s",
+                        B: "3 m/s",
+                        C: "4 m/s",
+                        D: "2.5 m/s",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Massasi 200 kg bo'lgan silindr radiusi 40 sm ga teng. Silindr markazidan o'tgan o'qqa nisbatan inersiya momentini hisoblang. ()",
+                    options: { A: "30", B: "40", C: "20", D: "16" },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Massasi 200 kg bo'lgan silindr radiusi 50 sm ga teng. Silindr markazidan o'tgan o'qqa nisbatan 3 rad/s burchak tezlik bilan aylanmoqda, uning aylanma harakat kinetik energiyasini hisoblang. ()",
+                    options: { A: "225 J", B: "300 J", C: "350 J", D: "325 J" },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Jism radiusi 20 sm bo'lgan doiraviy orbita bo'ylab 2 m/s tezlik bilan harakat qilmoqda, agar uning massasi 1 kg ga teng. Uning impuls momentini hisoblang.",
+                    options: { A: "0.2", B: "0.4", C: "0.6", D: "0.8" },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Prujinaning bikrligi 400 N/m ga teng. Unga 30 kg massali jism osilsa uning absolyut uzayishi qancha bo'ladi?",
+                    options: {
+                        A: "0.75 sm",
+                        B: "1.33 sm",
+                        C: "0.75 m",
+                        D: "20 sm",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Jismga 20 kg yuk osilganda uning uzunligi 20 sm dan 22 sm gacha uzaydi. Uning nisbiy uzayishi hisoblang. (%)",
+                    options: { A: "10 %", B: "20 %", C: "30 %", D: "5 %" },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Jismga 30 N kuch qo'yilganda 2 sm ga uzaydi. Agar jismning uzunligi 20 sm ga teng va ko'ndalang kesim yuzasi 10 sm2 bo'lsa, jism uchun Yung modulini hisoblang.",
+                    options: {
+                        A: "3∙10<sup>5</sup> Pa",
+                        B: "10<sup>5</sup> Pa",
+                        C: "5∙10<sup>5</sup> Pa",
+                        D: "10<sup>6</sup> Pa",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Jismning deformatsiyasi elastik deformatsiya bo'lishi uchun qanday shart bajarilishi kerak?",
+                    options: {
+                        A: "jismga qo'yilgan kuch olingandan keyin ham jism o'zining oldingi xolatiga to'liq qaytishi kerak",
+                        B: "jismga qo'yilgan kuch olingandan keyin ham jism o'zining oldingi xolatiga to'liq bo'lmasa ham qaytishi kerak",
+                        C: "jismga qo'yilgan kuch olingandan keyin ham jism o'zining oldingi xolatiga umuman to'liq qaytmasligi kerak",
+                        D: "Berilgan javoblar ichida to'g'risi yo'q",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Vaqt o'tishi bilan so'nmaydigan, sinus yoki kosinus qonuni bo'yicha sodir bo'ladigan tebranishlar qanday tebranishlar deyiladi?",
+                    options: {
+                        A: "So'nuvchi tebranishlar",
+                        B: "Garmonik tebranishlar",
+                        C: "Majburiy tebranishlar",
+                        D: "JITY",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Jismning tebranish tenglamasi x = 0.2 Sin10t  ko'rinishida. Uning 2 s dagi tezligini hisoblang.  Cos(30rad) = 0.4 deb hisoblang.",
+                    options: {
+                        A: "0.4 m/s",
+                        B: "0.8 m/s",
+                        C: "0.12 m/s",
+                        D: "0.15 m/s",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Jismning tebranish tenglamasi x = 0.25 Cos100t  m ko'rinishida. Uning maksimal tezligini hisoblang.",
+                    options: {
+                        A: "2.5 m/s",
+                        B: "25 m/s",
+                        C: "250 m/s",
+                        D: "30 m/s",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Tebranishlarda rezonans hodisasi deb nimaga aytiladi?",
+                    options: {
+                        A: "tashqi kuch tasirida tebranish amplitudasining keskin kamayshiga",
+                        B: "tashqi kuch tasirida tebranish amplitudasining 2 marta kamayshiga",
+                        C: "tashqi kuch tasirida tebranish amplitudasining keskin ortishiga",
+                        D: "tashqi kuch tasirida tebranish amplitudasining e marta ortishiga",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Matematik mayatnikning uzunligi 4 marta ortsa, uning tebranish chastotasi qanday o'zgaradi?",
+                    options: {
+                        A: "2 marta ortadi",
+                        B: "4 marta ortadi",
+                        C: "4 marta kamayadi",
+                        D: "2 marta kamayadi",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Prujinali mayatnikda tebranma harakat qilayotgan jismning tebranish davri o'zgarmasligi uchun prujina bikrligi 4 marta ortganda, jism massasini nechi marta va qanday o'zgartirish kerak?",
+                    options: {
+                        A: "2 marta orttirish kerak",
+                        B: "3 marta orttirish kerak",
+                        C: "4 marta orttirish kerak",
+                        D: "4 marta kamaytirish kerak",
+                    },
+                    correct: "C",
+                },
+                {
+                    question: "Molyar massa deb nimaga aytiladi?",
+                    options: {
+                        A: "molekula massasining uglerod atomining 1/12 qismiga nisbatiga",
+                        B: "molekula massasining uglerod atomining 1/10 qismiga nisbatiga",
+                        C: "molekula massasining uglerod atomining 1/5 qismiga nisbatiga",
+                        D: "Berilgan javoblar barchasi noto'g'ri",
+                    },
+                    correct: "A",
+                },
+                {
+                    question: "Molyar massa deb nimaga aytiladi?",
+                    options: {
+                        A: "jism massasining molyar massasiga nisbatiga teng kattalikka",
+                        B: "molyar massaning jism massasiga nisbatiga teng kattalikka",
+                        C: "moddagi molekulalar sonining avagadro soniga nisbatiga teng kattalikka",
+                        D: "A va C javoblar to'g'ri",
+                    },
+                    correct: "D",
+                },
+                {
+                    question: "Molyar massa ifodasini ko'rsating.",
+                    options: {
+                        A: "ν = m/μ",
+                        B: "ν = μ/m",
+                        C: "ν = N/N<sub>A</sub>",
+                        D: "A va C",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Massasi 32 g bo'lgan kislorodning modda miqdorini hisoblang. Kisorod uchun molyar massasi 32 g/mol ga teng.",
+                    options: {
+                        A: "1 mol",
+                        B: "2 mol",
+                        C: "64 mol",
+                        D: "3 mol",
+                    },
+                    correct: "A",
+                },
+                {
+                    question: "Avagadro doimiysining qiymati nimaga teng?",
+                    options: {
+                        A: "N<sub>A</sub> = 6.02 ∙ 10<sup>22</sup> mol<sup>-1</sup>",
+                        B: "N<sub>A</sub> = 6.02 ∙ 10<sup>23</sup> mol<sup>-1</sup>",
+                        C: "N<sub>A</sub> = 6.02 ∙ 10<sup>-22</sup> mol<sup>-1</sup>",
+                        D: "JITY",
+                    },
+                    correct: "B",
+                },
+                {
+                    question: "Avagadro doimiysining fizik ma'nosi nima?",
+                    options: {
+                        A: "1 kg moddadagi atomlar soni",
+                        B: "1 mol moddadagi molekulalar soni",
+                        C: "1 kg moddadagi molekulalar soni",
+                        D: "1 mol moddadagi ionlar soni",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Gazni ideal deb hisoblash uchun nimalarni hisobga olmaslik kerak?",
+                    options: {
+                        A: "molekulalarning ta'sirlashuvini",
+                        B: "molekulalarning massasini",
+                        C: "molekulalarning massalarini",
+                        D: "javoblar ichida to'g'risi yo'q",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Selsiy shkalasi bo'yicha temparatura -73 0C ga teng bo'lsa, absolyut shkala (yoki Kelvin shkalasi) bo'yicha temperatura qanchaga teng bo'ladi?",
+                    options: { A: "250 K", B: "200 K", C: "150 K", D: "100 K" },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Absolyut shkala bo'yicha qanday temperaturada molekulalar harakatdan to'xtaydi?",
+                    options: { A: "0 K", B: "-273 K", C: "4 K", D: "-1 K" },
+                    correct: "A",
+                },
+                {
+                    question: "Bolsman doimiysining fizika manosi qanday?",
+                    options: {
+                        A: "modda temperaturasi 10 K ga o'zgarganda bitta molekulaning o'rtacha kinetik energiyasi qanchaga ortishini ko'rsatadi",
+                        B: "modda temperaturasi 10 K ga o'zgarganda bitta molekulaning o'rtacha kinetik energiyasi qanchaga kamayishini ko'rsatadi",
+                        C: "modda temperaturasi 1 K ga o'zgarganda bitta molekulaning o'rtacha kinetik energiyasi qanchaga o'zgarishini ko'rsatadi",
+                        D: "yuqorida berilgan barcha javoblar noto'g'ri",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Temperaturasi 400 K bo'lgan bir atomli ideal gaz molekulalarining o'rtacha kinetik energiyasini hisoblang.",
+                    options: {
+                        A: "8.28∙10<sup>23</sup> J",
+                        B: "8.28∙10<sup>-23</sup> J",
+                        C: "8.28∙10<sup>-21</sup> J",
+                        D: "8.28∙10<sup>-25</sup> J",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "3 mol moddadagi molekulalar soni topilsin. Avagadro doimiysi N<sub>A</sub>=6.02 ∙ 10<sup>23</sup> mol<sup>-1</sup> ga teng.",
+                    options: {
+                        A: "18.06∙10<sup>20</sup> ta",
+                        B: "18.06∙10<sup>22</sup> ta",
+                        C: "18.06∙10<sup>23</sup> ta",
+                        D: "18.06∙10<sup>25</sup> ta",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Ideal gaz uchun asosiy xolat parametrlari qaysilar?",
+                    options: {
+                        A: "bosim va temperatura",
+                        B: "bosim va hajm",
+                        C: "bosim, hajm va massa",
+                        D: "bosim, hajm va temperatura",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Hajmi 8.31 litr bo'lgan idishda 400 K temperaturali 1 mol ideal gaz bor. Uning idishga berayotgan o'rtacha bosimini hisoblang.  (kPA)",
+                    options: { A: "400", B: "300", C: "831", D: "200" },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Ichidagi gaz bosimi 300 kPa bo'lgan idishning hajmi 8.31 litr. Agar idishdagi gaz temperaturasi  600 K ga teng bo'lsa, modda miqdorini hisoblang.",
+                    options: {
+                        A: "4 mol",
+                        B: "0.5 mol",
+                        C: "1.2 mol",
+                        D: "3 mol",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Ichidagi gaz bosimi 300 kPa bo'lgan idishning hajmi 8 litr ga teng. Agar idishda bir atomli ideal gaz bo'lsa, uning ichki energiyasini hisoblang.",
+                    options: {
+                        A: "360 J",
+                        B: "3600 J",
+                        C: "36 kJ",
+                        D: "1800 J",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Ikki atomli gaz uchun molekulalar erkinlik darajasi odatda nechaga teng bo'ladi?",
+                    options: { A: "i = 3", B: "i = 4", C: "i = 6", D: "i = 5" },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Biror kuch maydonida joylashgan gaz uchun Bo'lsman taqsimoti qanday?",
+                    options: {
+                        A: "p<sub>h</sub> = p<sub>0</sub>∙e<sup>-m<sub>0</sub>gh/kT</sup>",
+                        B: "n<sub>h</sub> = n<sub>0</sub>∙e<sup>-m<sub>0</sub>gh/kT</sup>",
+                        C: "p<sub>0</sub> = p<sub>h</sub>∙e<sup>-m<sub>0</sub>gh/kT</sup>",
+                        D: "A va B",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Molekulalarning tezliklari bo'yicha taqsimoti  nimani tushuntiradi?",
+                    options: {
+                        A: "Berilgan temperaturada gaz molekulalarning qanday qismi berilgan tezlikka yaqin tezliklarda harakat qilishini ko'rsatadi",
+                        B: "Berilgan temperaturada gaz molekulalarning qanday qismi berilgan tezlik yarimi yaqinida harakat qilishini ko'rsatadi",
+                        C: "Berilgan temperaturada gaz molekulalarning qanday qismi o'rtacha kvadratik tezlikka  yaqin tezlikda harakat qilishini ko'rsatadi",
+                        D: "Berilgan temperaturada gaz molekulalarning qanday qismi o'rtacha arifmetik tezlik yaqinidagi tezlikda harakat qilishini ko'rsatadi",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Temperaturasi 400 K bo'lgan vodorod molekulalarining o'rtacha kvadratik tezligini hisoblang. Vodorodning molyar massasi 2 g/mol.",
+                    options: {
+                        A: "2232.9 m/s",
+                        B: "1932.5 m/s",
+                        C: "400,45 m/s",
+                        D: "1242,45 m/s",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Temperaturasi 400 K bo'lgan kislorod molekulalarining o'rtacha arifmetik tezligini hisoblang. Kislorodning molyar massasi 32 g/mol.",
+                    options: {
+                        A: "400.4 m/s",
+                        B: "55.23 m/s",
+                        C: "558.23 m/s",
+                        D: "600.23 m/s",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Temperaturasi 400 K bo'lgan geliy molekulalarining eng katta ehtimollik tezligini hisoblang. Geliyning molyar massasi 4 g/mol.",
+                    options: {
+                        A: "1300.7 m/s",
+                        B: "1578.9 m/s",
+                        C: "1234.34 m/s",
+                        D: "210.34 m/s",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Quyidagilardan qaysi biri izotermik jarayonni to'g'ri ifodalaydi?",
+                    options: {
+                        A: "T = const , pV = const",
+                        B: "V = const, P/T = const",
+                        C: "p = const, V/T = const",
+                        D: "pV<sup>n</sup> = const",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Quyidagilardan qaysi biri izobarik jarayonni to'g'ri ifodalaydi?",
+                    options: {
+                        A: "T = const , pV = const",
+                        B: "V = const, P/T = const",
+                        C: "p = const, V/T = const",
+                        D: "pV<sup>n</sup> = const",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Quyidagilardan qaysi biri izoxorik jarayonni to'g'ri ifodalaydi?",
+                    options: {
+                        A: "T = const , pV = const",
+                        B: "V = const, P/T = const",
+                        C: "p = const, V/T = const",
+                        D: "pV<sup>n</sup> = const",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Quyidagilardan qaysi biri adiabatik jarayonni to'g'ri ifodalaydi?",
+                    options: {
+                        A: "T = const , pV = const",
+                        B: "V = const, P/T = const",
+                        C: "p = const, V/T = const",
+                        D: "pV<sup>n</sup> = const",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Hajmi 30 litr bo'lgan idishdagi gaz izotermik kengayib, 40 litr bo'ldi. Agar gazning dastlabki bosimi 40 kPa bo'lsa, keyingi bosimini hisoblang.",
+                    options: {
+                        A: "30 kPa",
+                        B: "40 kPa",
+                        C: "50 kPa",
+                        D: "10 kPa",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Hajmi 4 m3 bo'lgan, 200 kPa bosim ostida turgan gaz izoxorik ravishda qizib, temperaturasini 300 K dan 600 K ga chiqdi. Uning keyingi bosimini hisoblang.",
+                    options: {
+                        A: "500 kPa",
+                        B: "400 kPa",
+                        C: "600 kPa",
+                        D: "200 kPa",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Ideal gaz izobarik kengayib hajmini 4 litr dan 6 litr gacha kengaytirdi. Agar uning keyingi temperaturasi 600 K bo'lsa, dastlabki temperaturasi qanday bo'lgan?",
+                    options: {
+                        A: "3000 K",
+                        B: "300 K",
+                        C: "400 K",
+                        D: "500 K",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Agar gaz uchun adiabata ko'rsatkichi 1.4 ga teng bo'lsa, uning boshlang'ich hajmi 5 litr va bosimi 200 kPa ga teng bo'lsa, adiabatik kengayib hajmi 10 litr bo'lganda uning bosimi qanday bo'lishini hisoblang.",
+                    options: {
+                        A: "75.8 kPa",
+                        B: "80 kPa",
+                        C: "90 kPa",
+                        D: "60 kPa",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Termodinamikaning 1-qonuni qanday?   Q – issiqlik miqdori, A – gaz bajargan ish, U -  ichki energiyaning o'zgarishi deb oling.",
+                    options: {
+                        A: "Q = A + U",
+                        B: "Q = A/U",
+                        C: "A = Q/A",
+                        D: "U = Q/A",
+                    },
+                    correct: "A",
+                },
+                {
+                    question: "Termodinamikaning 2-qonuni qanday tariflanadi?",
+                    options: {
+                        A: "Barcha issiqlik ishga aylanadigan jarayon bo'lishi mumkin emas",
+                        B: "Issiqlik o'z-o'zidan sovuq jismdan issiq jismga o'tmaydi",
+                        C: "Absolyut nol temperaturaga erishib bo'lmaydi",
+                        D: "A va B javoblar ikkalasi ham to'g'ri",
+                    },
+                    correct: "D",
+                },
+                {
+                    question: "Termodinamikaning 3-qonuni qanday tariflanadi?",
+                    options: {
+                        A: "Sistemaning absolyut temperaturasi nolga intilganda, sistemaning entropiyasi hech qanday parametrlarga bog'liq bo'lmay qoladi va nolga intiladi.",
+                        B: "Barcha issiqlik ishga aylanadigan jarayon bo'lishi mumkin emas",
+                        C: "Issiqlik o'z-o'zidan sovuq jismdan issiq jismga o'tmaydi",
+                        D: "Berilgan javoblar birontasi ham to’g’ri emas",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Issiqlik mashinasi isitgichda 400 kJ energiya oldi va 300 kJ foydali ish bajardi. Uning foydali ish koeefitsientini hisoblang.",
+                    options: { A: "80 %", B: "20 %", C: "25 %", D: "75 %" },
+                    correct: "D",
+                },
+            ];
+
+            const section2Questions = [
+                {
+                    question: "Elektr zaryadlarning saqlanishi qonuni qanday ?",
+                    options: {
+                        A: "yopiq sistemaga kiruvchi jismlarning elektr zaryadlari ularning har qanday ta’sirlashishidan keyin ham o’zgarmas saqlanadi",
+                        B: "yopiq sistemaga kiruvchi jismlarning elektr zaryadlari ularning har qanday tashqi tasirlashuvidan keyin ham o’zgarmas saqlanadi",
+                        C: "yopiq sistemaga kiruvchi jismlarning elektr zaryadlari ularning har qanday tashqi tasirlashuvidan keyin ham faqat yarim qismi uchun o’zgarmas saqlanadi",
+                        D: "Berilgan javoblar ichida to’g’risi yo’q",
+                    },
+                    correct: "A",
+                },
+                {
+                    question: "Zaryadlarning sirt zichligi qanday topiladi?",
+                    options: {
+                        A: "σ = dq/dS",
+                        B: "σ = dS/dq",
+                        C: "σ = dq∙dS",
+                        D: "JITY",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Zaryadlari mor ravishda 3 va 4  bo’lgan zaryadlar bir-biridan 3 sm masoda turibdi. Ularning o’zaro ta’sirlashuv kuchini hisoblang. Elektr doimiysi    ga teng.",
+                    options: { A: "100 N", B: "110 N", C: "120 N", D: "130 N" },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Zaryadi 10 C bo’lgan sharning radiusi 20 sm ga teng. Uning sirtidan 10 sm masofadagi elektr maydon kuchlanganligini hisoblang.   deb hisoblang.",
+                    options: {
+                        A: "10<sup>12</sup> V/m",
+                        B: "10<sup>10</sup> V/m",
+                        C: "10<sup>8</sup> V/m",
+                        D: "10<sup>7</sup> V/m",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Zaryadi 10 C bo’lgan sharning radiusi 20 sm ga teng. Uning markazidan 10 sm masofadagi elektr maydon kuchlanganligini hisoblang.   deb hisoblang.",
+                    options: {
+                        A: "250 V/m",
+                        B: "10<sup>10</sup> V/m",
+                        C: "100 V/m",
+                        D: "0",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Yopiq sirt bilan chegaralangan zaryad miqdori shu sirt bo’yicha chiquvchi elektr maydon induksiya oqimiga teng. Bu ....",
+                    options: {
+                        A: "Kulon qonuni",
+                        B: "Gauss teoremasi",
+                        C: "Faradey qonuni",
+                        D: "Avagadro qonuni",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Quyidagilardan qaysi biri Kulon qonuni formulasini to’g’ri ifodalaydi?",
+                    options: {
+                        A: "F = k|q<sub>1</sub>||q<sub>2</sub>|/r<sup>2</sup>",
+                        B: "∮D dS = Q",
+                        C: "∫∇E dV = Q/ε<sub>0</sub>",
+                        D: "B va C",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Quyidagilardan qaysi biri Gauss teoremasini to’g’ri ifodalaydi?",
+                    options: {
+                        A: "F = k|q<sub>1</sub>||q<sub>2</sub>|/r<sup>2</sup>",
+                        B: "∮D dS = Q",
+                        C: "∫∇E dV = Q/ε<sub>0</sub>",
+                        D: "B va C",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Bir jinsli silindrga zaryad berildi. Zaryadlar unda qanday taqsimlanadi. R silindr radiusi.",
+                    options: {
+                        A: "sirt bo’ylab notekis",
+                        B: "butun hajm boyicha tekis",
+                        C: "butun sirt bo’yicha tekis",
+                        D: "JITY",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Zaryadi 10 C bo’lgan sharning radiusi 20 sm ga teng. Uning sirtidan 10 sm masofadagi elektr maydon potensialini hisoblang.   deb hisoblang.",
+                    options: {
+                        A: "9∙10<sup>8</sup> V",
+                        B: "9∙10<sup>9</sup> V",
+                        C: "9∙10<sup>10</sup> V",
+                        D: "9∙10<sup>11</sup> V",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Zaryadi 10 C bo’lgan sharning radiusi 20 sm ga teng. Uning markazidan 10 sm masofadagi elektr maydon potensialini hisoblang.  deb hisoblang.",
+                    options: {
+                        A: "2∙10<sup>8</sup> V",
+                        B: "1.125∙10<sup>9</sup> V",
+                        C: "2.25∙10<sup>10</sup> V",
+                        D: "1.125∙10<sup>10</sup> V",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Elektr zanjirning bir qismi uchun O’m qonuni qanday ko’rinishiga ega?",
+                    options: {
+                        A: "I = U/R<sup>2</sup>",
+                        B: "I = U/R",
+                        C: "I = dq/dt",
+                        D: "m = k I t",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Zanjirning bir qismidagi rezistor qarshiligi 200   ga teng. Agar undan o’tayorgan to’k kuchi 2 A teng bo’lsa. Bu rezistor uchlaridagi potensiallar ayirmasini hisoblang.",
+                    options: { A: "300 V", B: "500 V", C: "400 V", D: "100 V" },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Zanjir elektr yurituvchi kuchi 20 V, ichki qarshiligi 2   bo’lgan manba va  18   qarshilikka ega bo’lgan rezistordan iborat. Zanjirdagi to’k kuchini hisoblang.",
+                    options: { A: "2 A", B: "4 A", C: "1 A", D: "3 A" },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Qarshiligi 20   va 30   bo’lgan rezistorlar ketma-ket ulangandagi umumiy qarshilik ularni parallel ulangadagi umumiy qarshilikdan qanchaga farq qiladi?",
+                    options: { A: "18", B: "28", C: "48", D: "38" },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Transformatorning birlamchi chulg’amida o’ramlar soni 4000 ta va kuchlanish 220 V ga teng. Agar uning ikkilamchi chulg’amida 10000 ta o’ramlar bo’lsa, uning kuchaytirish koeffitsienti va ikkilamchi chulg’amdagi kuchlanishni hisoblang.",
+                    options: {
+                        A: "k = 2.5 , U =110 V",
+                        B: "k = 2.5 , U =550 V",
+                        C: "k = 1.5 , U =110 V",
+                        D: "k = 0.4 , U =550 V",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "To’g’ri o’tgazgichdan 2A to’k oqmoqda. Shu o’tkazgichdan 10 sm masofadagi magnit maydon induksiyasini hisoblang. O’tkazgich magnit kirituvchanligi  bo’lgan muhitda joylashgan va   deb hisoblang.",
+                    options: { A: "8", B: "4", C: "2", D: "1" },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Aylanma to’kdan 2 A to’k oqmoqda, agar aylana radiusi 2 sm ga teng bo’lsa, uning markazidagi magnit maydon induksiyasini hisoblang.",
+                    options: { A: "20", B: "10", C: "15", D: "5" },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Tebranish konturida qaysi kattaliklar tebranadi?",
+                    options: {
+                        A: "zaryad",
+                        B: "to’k kuchi",
+                        C: "kuchlanish",
+                        D: "barchasi",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Tebranish konturi induktivligi 2 Gn bo’lgan induktiv g’altak va sig’imi 400   bo’lgan kondensatordan iborat. Agar G’altakdagi to’k kuchining maksimal qiymati 2A ga teng bo’lsa, kondensatordagi kuchlanishning maksimal qiymatini hisoblang.",
+                    options: { A: "10 V", B: "100 V", C: "1000 V", D: "1 V" },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Agar o’zgaruvchan to’k zanjiridagi tsiklik chastota 200 rad/s bo’lsa, sig’imi 20  bo’lgan kondensatorning bu zanjirdagi sig’im qarshiligi qanday bo’ladi? (  )",
+                    options: { A: "200", B: "250", C: "300", D: "400" },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Zanjirdagi to’kning o’zgarish qonuni I = 0.5 t2  (A) ko’rinishga ega bo’lsa uning ko’ndalang kesimidan 1 min da qancha zaryad oqib o’tadi?",
+                    options: {
+                        A: "36000 C",
+                        B: "3600 C",
+                        C: "360 C",
+                        D: "36 C",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Quydagilardan biri elektromagnit maydon uchun Maksvell tenglamasi hisoblanadi?",
+                    options: {
+                        A: "divB = 0",
+                        B: "rotE = -∂B/∂t",
+                        C: "divE = ρ",
+                        D: "barchasi",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Elektr zanjirning bir qismi uchun O’m qonuni qanday ko’rinishiga ega?",
+                    options: {
+                        A: "I = U/R<sup>2</sup>",
+                        B: "I = U/R",
+                        C: "I = dq/dt",
+                        D: "m = k I t",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Zanjirning bir qismidagi rezistor qarshiligi 200   ga teng. Agar undan o’tayorgan to’k kuchi 2 A teng bo’lsa. Bu rezistor uchlaridagi potensiallar ayirmasini hisoblang.",
+                    options: { A: "300 V", B: "500 V", C: "400 V", D: "100 V" },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Zanjir elektr yurituvchi kuchi 20 V, ichki qarshiligi 2   bo’lgan manba va  18   qarshilikka ega bo’lgan rezistordan iborat. Zanjirdagi to’k kuchini hisoblang.",
+                    options: { A: "2 A", B: "4 A", C: "1 A", D: "3 A" },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Qarshiligi 40   va 60   bo’lgan rezistorlar ketma-ket ulangandagi umumiy qarshilik ularni parallel ulangadagi umumiy qarshilikdan qanchaga farq qiladi?",
+                    options: { A: "18", B: "76", C: "48", D: "38" },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Transformatorning birlamchi chulg’amida o’ramlar soni 4000 ta va kuchlanish 220 V ga teng. Agar uning ikkilamchi chulg’amida 2000 ta o’ramlar bo’lsa, uning kuchaytirish koeffitsienti va ikkilamchi chulg’amdagi kuchlanishni hisoblang.",
+                    options: {
+                        A: "k = 2.5 , U =110 V",
+                        B: "k = 2.5 , U =550 V",
+                        C: "k = 1.5 , U =110 V",
+                        D: "k = 0.5 , U =110 V",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Zaryadlari mor ravishda 3 va 4  bo’lgan zaryadlar bir-biridan 3 sm masoda turibdi. Ularning o’zaro ta’sirlashuv kuchini hisoblang. Elektr doimiysi    ga teng.",
+                    options: { A: "100 N", B: "110 N", C: "120 N", D: "130 N" },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Zaryadi 10 C bo’lgan sharning radiusi 20 sm ga teng. Uning sirtidan 10 sm masofadagi elektr maydon kuchlanganligini hisoblang.   deb hisoblang.",
+                    options: {
+                        A: "10<sup>12</sup> V/m",
+                        B: "10<sup>10</sup> V/m",
+                        C: "10<sup>8</sup> V/m",
+                        D: "10<sup>7</sup> V/m",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Zaryadi 10 C bo’lgan sharning radiusi 20 sm ga teng. Uning markazidan 10 sm masofadagi elektr maydon kuchlanganligini hisoblang.   deb hisoblang.",
+                    options: {
+                        A: "250 V/m",
+                        B: "10<sup>10</sup> V/m",
+                        C: "100 V/m",
+                        D: "0",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Radiuslari 1 sm bo’lgan 8 ta tomchi birlashib katta tomchi hosil qildi. Agar ularning zaryadlari bir ishorali va teng bo’lsa, katta tomchining potensiali tomchilar birlashmasidan oldingi tomchilar potensiallari yig’indisidan qanday farq qiladi?",
+                    options: {
+                        A: "2 marta katta",
+                        B: "2 marta kichik",
+                        C: "4 marta katta",
+                        D: "4 marta kam",
+                    },
+                    correct: "B",
+                },
+                {
+                    question: "Yorug’lik manbalari va turlari ?",
+                    options: {
+                        A: "tabiiy, suniy",
+                        B: "oq, suniy",
+                        C: "sariq, qizil",
+                        D: "elektr, quyosh",
+                    },
+                    correct: "A",
+                },
+                {
+                    question: "Ravshanlik nima ?",
+                    options: {
+                        A: "birlik yuzadan normal ravishda chiquvchi yorug’lik oqmi",
+                        B: "birlik yuzaga tushuvchi yorug’lik oqimi",
+                        C: "birlik yuzadan o’tuvchi yorug’lik oqimi",
+                        D: "birlik sirtdan o’tuvchi yorug’lik oqimi",
+                    },
+                    correct: "A",
+                },
+                {
+                    question: "Yoritilganlik bu-?",
+                    options: {
+                        A: "birlik fazoviy burchakka tushuvchi yorug’lik oqimi",
+                        B: "birlik fazoviy burchakdan o’tuvchi yorug’lik oqimi",
+                        C: "birlik yuzaga tushuvchi yorug’lik oqimi",
+                        D: "birlik yuzada chiquvchi yorug’lik oqimi",
+                    },
+                    correct: "C",
+                },
+                {
+                    question: "Yorug’lik energiyasini qabul qiluvchi asboblar?",
+                    options: {
+                        A: "ko’z , fotoelement",
+                        B: "quloq, ko’z",
+                        C: "fotoapparat, ko’zgu",
+                        D: "quloq, fotoapparat",
+                    },
+                    correct: "A",
+                },
+                {
+                    question: "Yorug’lik kuchi deb nima aytiladi ?",
+                    options: {
+                        A: "fazoviy burchakdan o’tuvchi yorug’lik bosimi",
+                        B: "fazoviy burchakdan o’tuvchi yorug’lik oqimi",
+                        C: "birlik sirtdan o’tuvchi yorug’lik oqimi",
+                        D: "katta fazoviy burchakdan o’tuvchi yorug’lik oqimi",
+                    },
+                    correct: "B",
+                },
+                {
+                    question: "Yorug’lik oqimi bu-...?",
+                    options: {
+                        A: "birlik yuzadan birlik vaqtda o’tuvchi yorug’lik energiyasi",
+                        B: "birlik yuzadan o’tuvchi yorug’lik energiyasi",
+                        C: "birlik yuzaga tug’ri keluvchi ravshanlik",
+                        D: "birlik yuzadan chiquvchi ravshanlik",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Yoritilganligi 104 lk bo’lsa, shunday vakumdagi 100 sm2 li yuzaga qanday yorug’lik oqimi tushadi (lm)?",
+                    options: { A: "10", B: "100", C: "1000", D: "1" },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "0,02 lm yorug’lik oqimi yuzi 5 sm2 bo’lgan sirtga perpendikulyar tushmoqda. Sirtning yoritilganligi qancha?",
+                    options: { A: "40", B: "20", C: "10", D: "60" },
+                    correct: "A",
+                },
+                {
+                    question: "Sirt ravshanligining birligi nima?",
+                    options: {
+                        A: "lm (lyumen)",
+                        B: "lk (lyuks)",
+                        C: "nt (nit)",
+                        D: "cd (kandella)",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Gorizontal stol sirtidan 1,5 metr balandlikda 150 cd li lampa osilgan. Lampa ostidagi stol sirtining yoritilganligini toping ?",
+                    options: { A: "10", B: "67", C: "78", D: "100" },
+                    correct: "B",
+                },
+                {
+                    question: "Nur deb nimaga aytiladi?",
+                    options: {
+                        A: "yo’rug’lik keng dastasini to’g’ri chiziq bo’ylab tarqalishi",
+                        B: "yorug’lik energiyasini to’g’ri chiziq bo’ylab tarqalishi",
+                        C: "yorug’likning to’g’ri chiziq bo’ylab tarqalishi",
+                        D: "yorug’likning sochilishi",
+                    },
+                    correct: "B",
+                },
+                {
+                    question: "Qaytish qonunini toping.",
+                    options: {
+                        A: "tushush nuqtasiga o’tkazilgan normal, tushgan va qaytgan nurlar bitta tekislikda yotadi, qaytish burchagi tushish burchagiga teng",
+                        B: "tushgan va qaytgan nurlar bitta tekislikda yotadi, qaytish burchagi tushish burchagiga teng",
+                        C: "tushgan nur va tushish nuqtasiga o’tkazilgan tik bitta tekislikda yotadi",
+                        D: "qaytish burchagi tushush burchagiga teng",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Linzaning turlari va ko’rinishlari necha xil bo’ladi ?",
+                    options: {
+                        A: "4 xil, 2xil",
+                        B: "2 xil, 8 xil",
+                        C: "3 xil, 4 xil",
+                        D: "2 xil, 6 xil",
+                    },
+                    correct: "D",
+                },
+                {
+                    question: "Linzaning bosh optik o’qi qanday aniqlanadi ?",
+                    options: {
+                        A: "linzaning ixtiyoriy nuqtasidan o’tuvchi to’g’ri chiziq",
+                        B: "linzani ikkiga bo’luvchi to’ri chiziq",
+                        C: "sfera markazlaridan o’tuvchi to’g’ri chiziq",
+                        D: "linza markazlaridan o’tuvchi to’gri chiziq",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Linzala yordamida buyum tasvirini hosil qilish uchun nechta nurlar yo’nalishi yetarli?",
+                    options: { A: "4", B: "3", C: "2", D: "1" },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Optik kuchi 10 dptr ga teng bo’lgan yig’uvchi linzadan 12,5 sm masofada sham turibdi tasvir linzadan qanday masofada hosil bo’ladi va u qanday?",
+                    options: {
+                        A: "50 sm , 4 marta kattalashtirilgan",
+                        B: "40 sm, 2 marta kattalashtirilgan",
+                        C: "25 sm , 4 marta kattalashtirilgan",
+                        D: "50 sm, 2 marta kattalashtirilgan",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Buyum linzadan 4F masofaga joylashtirilgan. Shu buyumning ekrandagi tasviri uning o’zidan necha marta kichik ?",
+                    options: {
+                        A: "o’ziga teng",
+                        B: "2 marta",
+                        C: "4 marta",
+                        D: "3 marta",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "4 marta kattalashtiradigan lupaning optik kuchini toping?",
+                    options: {
+                        A: "8 dptr",
+                        B: "16 dptr",
+                        C: "25 dptr",
+                        D: "4 dptr",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Qaytgan va singan yorug’lik qutblanish hodisasi tartibi qanday?",
+                    options: {
+                        A: "dielektrikdan o’tgan yorug’lik qutblanib sinadi",
+                        B: "dielektrikga tushgan yorug’lik qutblanmasdan qaytadi",
+                        C: "dielektrikga tushgan yorug’lik qutblanmasdan o’tadi",
+                        D: "dielektikga tushgan yorug’lik qaytadi, sinadi va ular qisman qutblangan bo’ladi",
+                    },
+                    correct: "D",
+                },
+                {
+                    question: "Bryuster qonuni ifodasini ko’rsating?",
+                    options: {
+                        A: "tgα = n<sub>2,1</sub>",
+                        B: "tgα = n<sub>1,2</sub>",
+                        C: "ctgα = n<sub>2,1</sub>",
+                        D: "JITY",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Jism yig’uvchi linzadan 2F masofada joylashtirildi. Uning tasviri qanday bo’ladi?",
+                    options: {
+                        A: "kattalashgan, haqiqiy",
+                        B: "kattalashgan, mavhum",
+                        C: "kichiklashgan, haqiqiy",
+                        D: "o’ziga teng, haqiqiy",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Bir xil yo’nalishda to’lqin fazalar farqi o’zgarmagan holda qo’shilsa qanday hodisa kuzatiladi ?",
+                    options: {
+                        A: "bir-biriga tik yo’nalgan to’qinlar qo’shilgan elliptik qutblangan to’lqin hosil qiladi",
+                        B: "bir xil tik yo’nalishdagi to’lqinlar qo’shilgan interferensiya hodisasi kuzatiladi",
+                        C: "bir-biriga ma'lum bir burchak bilan tarqaluvchi to‘lqinlar qo‘shilganda yorug‘likning qutblanishi kuzatiladi",
+                        D: "bir xil qarma-qarsho yo’nalishdagi to’lqinlar qo’shilgan yorug’lik interferensiya hodisasi kuzatiladi",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Interferensiya hodisasida energiyaning saqlanish qonini buziladimi?",
+                    options: {
+                        A: "buzilmaydi",
+                        B: "buziladi",
+                        C: "ahamiyatga ega emas",
+                        D: "faqat impulsning saqlanish qonuni bajariladi",
+                    },
+                    correct: "A",
+                },
+                {
+                    question: "Kogerent va kogerent bo’lmagan to’lqinlar?",
+                    options: {
+                        A: "amplitudalari teng to’lqinlar kogerent va aksincha",
+                        B: "fazalar farqi o’zgarmas to’lqinlar kogerent, aksi nokegerent",
+                        C: "chastotalari teng to’lqinlar kogerent va aksincha",
+                        D: "amplitudalari va chastotalari teng to’lqinlar kogerent, aksi nokogerent to’lqinlar",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Nyuton halqasini kuzatishda qanday uskunadan foydalaniladi ?",
+                    options: {
+                        A: "yorug‘lik manbai, kondensor, yig‘uvchi linza va yassi plastinka, linza, ekran",
+                        B: "yorug‘lik manbai, kondensor, sochuvchi linza va yassi plastinka, kondensor, ekran",
+                        C: "yorug‘lik manbai, kondensor, sochuvchi linza va yassi plastinka",
+                        D: "yorug‘lik manbai, yassi plastinka va yig‘uvchi linza, ekran",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Difraksiya hodisasida Gyuygens – Frenel tamoyilini aniqlang",
+                    options: {
+                        A: "yorug‘lik to‘lqin manbadan kuzatish nuqtasigacha sinmasdan uzatiladi",
+                        B: "yorug‘liq to‘lqin fronti manbadan kuzatish nuqtasigacha o‘zgarmasdan uzatiladi",
+                        C: "yorug‘liq to‘lqini manbadan kuzatish nuqtasidan ikkilamchi manbalar yordamida uzatiladi",
+                        D: "yorug‘liq to‘lqini manbadan kuzatish nuqtasidan ikkilamchi manbalar va ikkilamchi to‘lqinlar interferensiyasi tufayli uzatiladi",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Yorug’lik tiqishlardan o’tganda qanday hodisa ro’y beradi?",
+                    options: {
+                        A: "yutiladi",
+                        B: "difraksiya",
+                        C: "interferensiya",
+                        D: "sochiladi",
+                    },
+                    correct: "B",
+                },
+                {
+                    question: "Difraksion panjara tuzilishi qanday?",
+                    options: {
+                        A: "bir xil kenglikdago tirqish yig’indisi",
+                        B: "har xil kenglikdagi tirqish va to’siqlar yig’indisi",
+                        C: "bir xil balandlikdagi tirqish va to’siqlar yig’indisi",
+                        D: "bir xil kenglikdagi tirqish va to’siqlar yig’indisi",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Davri 0,01 mm bo’lgan difraksion panjara yordamida hosil qilingan birinchi tartibli spektrda yashil yorug’lik nurlarining (λ=0,55mkm) og’ish burchagini aniqlang?",
+                    options: { A: "2°", B: "3°", C: "1,5°", D: "1,2°" },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Yorug’likning dispersiyasini kuzatish usulini kursating.",
+                    options: {
+                        A: "bir-biriga tik joylashtirilgan prizmalar",
+                        B: "bir-biriga parallel joylashtirilgan prizmalar",
+                        C: "bir-biriga ulangan prizmalar",
+                        D: "bitta prizma",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Muhit nur sindirish ko’rsatkichining tushayotgan nur to’lqin uzunligiga bog’liqligi  .... deyiladi.",
+                    options: {
+                        A: "intenferensiya",
+                        B: "difraksiya",
+                        C: "dispersiya",
+                        D: "qutblanish",
+                    },
+                    correct: "C",
+                },
+                {
+                    question: "Yorug’lik qaysi to’lqin turiga kiradi ?",
+                    options: {
+                        A: "bo’ylama",
+                        B: "ko’ndalang",
+                        C: "yassi",
+                        D: "sferik",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Yorug’lik bir muitdan boshqa muitga o’tganida qaysi parametri o’zgarmaydi?",
+                    options: {
+                        A: "to’lqin uzunligi",
+                        B: "chastotasi",
+                        C: "tezligi",
+                        D: "barcha parametrlari o’zgaradi",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Frenal va Froungofer defraksiyalari farqi nimada?",
+                    options: {
+                        A: "bitta tirqish va dumaloq to’siq",
+                        B: "bitta tirqish va parallel to’lqinlar",
+                        C: "sferik va bitta tirqish",
+                        D: "sferik va parallel to’lqinlar",
+                    },
+                    correct: "D",
+                },
+                {
+                    question: "Gyuygens tamoyili ...",
+                    options: {
+                        A: "to‘lqin sirtdan tarqaluvchi to‘lqinlar ta'sirlashmaydi",
+                        B: "to‘lqin sirtidan tarqalayotgan ikkilamchi to‘lqinlar yo‘nalishini qarama-qarshi o‘zgartiradi",
+                        C: "to‘lqin sirti yetib kelgan geometrik nuqtalar ikkilamchi manbalar vazifasini bajaradi",
+                        D: "to‘lqin sirtidan tarqalayotgan ikkilamchi to‘lqinlar yo‘nalishini o‘zgartirmaydi",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Kompton effekti qaysi nazariya asosida tushuntiriladi ?",
+                    options: {
+                        A: "To’lqin nazariyasi orqali",
+                        B: "Kvant nazariyasi orqali",
+                        C: "Hech qaysi nazariya orqali",
+                        D: "Berilgan javoblar to’g’risi yo’q",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Absolyut qora jismning nur chiqarish qobilyati temperaturaga qanday bog’liq?",
+                    options: {
+                        A: "temperaturaning 2 darajasiga to’g’ri proporsional",
+                        B: "temperaturamimg 4 darajasiga teskari proporsional",
+                        C: "temperaturaning 4 darajasiga to’gri proporsional",
+                        D: "temperaturaga bog’liq emas",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Mutloq qora jismning nur chiqarish energetik funksiyasi Stefan-Bol’tsman va Vin qonunlarida o’zaro qanday holatda mos tushadi?",
+                    options: {
+                        A: "chastotaning kichik qiymatlarida",
+                        B: "chastotataning katta qiymatlarida",
+                        C: "moslik yo’q",
+                        D: "mutloq qora jism nur chiqarmaydi.",
+                    },
+                    correct: "A",
+                },
+                {
+                    question: "Foton energiyasi ifodasini ko'rsating.",
+                    options: {
+                        A: "E = hν",
+                        B: "E = hc/λ",
+                        C: "E = mc<sup>2</sup>",
+                        D: "Barcha javoblar to'g'ri",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Absolyut qora jism nurlanishi uchun Plank taqsimoti formulasi qanday?",
+                    options: {
+                        A: "E = σT<sup>4</sup>",
+                        B: "ρ<sub>ν,T</sub> = (8πν<sup>2</sup>/c<sup>3</sup>)∙(hν / (e<sup>hν/kT</sup>-1))",
+                        C: "ρ<sub>ν,T</sub> = (8πhν<sup>3</sup>/c<sup>3</sup>)∙(1 / (e<sup>hν/kT</sup>-1))",
+                        D: "JITY",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Temperaturasi 1000 K bo'lgan jism sirtining birlik yuzasidan vaqt birligida sochilayotgan nurlanish energiyasini toping. (J)",
+                    options: {
+                        A: "5.67∙10<sup>4</sup> J",
+                        B: "5.67∙10<sup>5</sup> J",
+                        C: "5.67∙10<sup>-4</sup> J",
+                        D: "5.67∙10<sup>3</sup> J",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Vinn qonuni fizik ma'nosi qaysi javobda to'g'ri ko'rsatilgan?",
+                    options: {
+                        A: "absolyut qora jismning berilgan temperaturada o'z energiyasining maksimal qismini qanday to'lqin uzunlik yaqinidagi to'lqinlarda sochayotganini ko'rsatadi",
+                        B: "absolyut qora jismning berilgan temperaturada o'z energiyasining minimal qismini qanday to'lqin uzunlik yaqinidagi to'lqinlarda sochayotganini ko'rsatadi",
+                        C: "absolyut qora jismning berilgan temperaturada o'z energiyasini qanday to'lqin uzunlik yaqinidagi to'lqinlarda sochayotganini ko'rsatadi",
+                        D: "Berilgan javoblarning barchasi noto'g'ri",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Absolyut qora jismning energetik yorituvchanligi ikki marta ortishi uchun uning termodinamik temperaturasini necha marta orttirish kerak?",
+                    options: { A: "2.1", B: "1.19", C: "3.19", D: "3.5" },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Agar pechning temperaturasi T=1200 K bo'lsa, yuzasi S = 8 sm2  bo'lgan eritish pechining tuynugidan t = 1 min vaqtda sochiladigan W energiya aniqlansin.",
+                    options: {
+                        A: "2350 J",
+                        B: "3550 J",
+                        C: "3650 J",
+                        D: "2000 J",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Vodorod atomida elektronning 1-orbitadagi tezligini hisoblang.",
+                    options: {
+                        A: "3.3 Mm/s",
+                        B: "2.1 km/s",
+                        C: "5.3 Mm/s",
+                        D: "2.5  Mm/s",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Vodorod atomidagi elektronning 2-orbitadagi energiyasini aniqlang, uning 1-orbitadagi energiyasi -13.6 eV.",
+                    options: {
+                        A: "3.4 eV",
+                        B: "4.3 eV",
+                        C: "5.2 eV",
+                        D: "2.5 eV",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Vodorod atomidagi elektron 3-orbitada harakatlanmoqda, uning aylanish raidusini hisoblang. 1-orabita radiusi  ga teng deb hisoblang.",
+                    options: {
+                        A: "4.5∙10<sup>-11</sup> m",
+                        B: "5∙10<sup>-10</sup> m",
+                        C: "4.5∙10<sup>-11</sup> m",
+                        D: "4.5∙10<sup>-10</sup> m",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Bor nazaryasi bo'yicha ikkita energetik sathlar orasida o'tishni bajargan elektronning chiqaradigan yoki yutadigan energiyasi qanday aniqlanadi?",
+                    options: {
+                        A: "hν = E<sub>n</sub> - E<sub>m</sub>",
+                        B: "hν = E<sub>n</sub> + E<sub>m</sub>",
+                        C: "hν = E<sub>n</sub> ÷ E<sub>m</sub>",
+                        D: "JITY",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Vodorod atomidagi elektron 3-energetik sathdan 1-energetik sathga o'tishi uchun qanday energiyali foton chiqarishi kerak?",
+                    options: {
+                        A: "2  eV",
+                        B: "4.5 eV",
+                        C: "1.2 eV",
+                        D: "12.1 eV",
+                    },
+                    correct: "D",
+                },
+                {
+                    question: "Fotoeffekt hodisasi deb nimaga aytiladi?",
+                    options: {
+                        A: "yorug'lik ta'sirida moddadan elektronlar ajralishi va elektr toki hosil bo'lishiga",
+                        B: "yorug'lik ta'sirida moddadagi elektronlar erkin xosil bo'lishi yoki elektr to'ki xosil bo'lishiga",
+                        C: "yorug'lik ta'sirida moddaning ionlanishiga",
+                        D: "Javoblar ichida to'g'risi yo'q",
+                    },
+                    correct: "B",
+                },
+                {
+                    question: "Tashqi fotoeffekt deb nimaga aytiladi?",
+                    options: {
+                        A: "Yorug'lik ta'sirida moddadan elektronlar ajralib elektr to'ki xosil bo'lishiga",
+                        B: "Yorug'lik ta'sirida moddadagi elektronlar erkin elektronlarga aylanib qolishiga",
+                        C: "Yorug'lik ta'sirida moddadan issiqlik ajralib chiqishiga",
+                        D: "Javoblar ichida to'g'risi yo'q",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Chiqish ishi 3 eV bo'lgan metall uchun fotoeffekt qizil chegarasini hisoblang. (nm)",
+                    options: {
+                        A: "310 nm",
+                        B: "414 nm",
+                        C: "200 nm",
+                        D: "150 nm",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Agar natriy uchun fotoeffektning qizil chegarasi  bo'lsa, elektronlarning natriydan chiqish ishi A aniqlansin (eV).",
+                    options: {
+                        A: "1.5 eV",
+                        B: "3.22 eV",
+                        C: "2.2 eV",
+                        D: "2,49 eV",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Foton massasi tinch turgan elektron massasiga teng bo'lishi uchun uning  energiyasi qancha bo'lishi kerak?",
+                    options: {
+                        A: "3.4 GeV",
+                        B: "2.1 MeV",
+                        C: "0.21 MeV",
+                        D: "0.51 MeV",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Muayyan metall uchun fotoeffektning qizil chegarasi 275 nm. Fotoeffektni vujudga keltiruvchi foton energiyasining minimal qiymati nimaga teng (eV) ?",
+                    options: {
+                        A: "3.5 eV",
+                        B: "4.5 eV",
+                        C: "2.47 eV",
+                        D: "1.95 eV",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "293 K temperaturada eng katta ehtimoliy tezlikda harakat qilayotgan vodorod atomi uchun de-Broyl to'lqin uzunligini toping .",
+                    options: { A: "1.8", B: "2.4", C: "3.6", D: "1.2" },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Elektron uchun de-Broyl to'lqin uzunligi 0,1 nm bo'lishi uchun u qanday tezlantiruvchi potensiallar farqi U ni o'tishi kerak?",
+                    options: { A: "300 V", B: "400 V", C: "150 V", D: "250 V" },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "De-Broyl to‘lqinlari qanday tezliklar bilan tarqaladi?",
+                    options: {
+                        A: "O‘rtacha va katta tezliklar bilan",
+                        B: "Kosmik tezliklar bilan",
+                        C: "Fazaviy va guruhiy tezliklar bilan",
+                        D: "To‘lqin tezliklari bilan",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Kompton effekti qaysi zarralar orasidagi to‘qnashuvda hosil  bo‘ladi?",
+                    options: {
+                        A: "Elektronning yadro bilan to‘qnashuvida",
+                        B: "Elektronning elektron bilan to‘qnashuvida",
+                        C: "Fotonning elektron bilan to‘qnashuvida",
+                        D: "Yadroning yadro bilan to‘qnashuvida",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Quyidagilardan qaysi biri Pauli prinsipi hisoblanadi?",
+                    options: {
+                        A: "Atomlarning asosiy holatlarda bo‘lishini",
+                        B: "Atomlarning uyg‘ongan holatlarda bo‘lishini",
+                        C: "Bitta kvant holatda (energetik sathda) kvant sonlari har xilbo‘lgan uchta elektron bo‘lishini",
+                        D: "Bir kvant holatda (energetik sathda) to‘rtta kvant sonlari bir xil qiymatga ega bo‘lgan ikkita elektron bo‘lishini",
+                    },
+                    correct: "D",
+                },
+                {
+                    question: "Shredinger tenglamasi nimani ifodalaydi?",
+                    options: {
+                        A: "kvant xolatdagi zarra harakatini",
+                        B: "elektronning yadro atrofidagi harakatini",
+                        C: "yadroning kvant xolatlarini",
+                        D: "berilgan javoblar ichida to’g’risi yo’q",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "ψ = A exp{ − i ( ω t − kZ )} funksiya Shredinger tenglamasining yechimi bo‘lishi uchun     u qanday shartlarni qanoatlantirishi kerak?",
+                    options: {
+                        A: "ψ-funksiya ko‘ndalang to‘lqin funksiyasi bo‘lishi kerak",
+                        B: "ψ-funksiya bo‘ylama to‘lqin funksiyasi bo‘lishi kerak",
+                        C: "ψ-funksiya bir qiymatli, chekli va uzluksiz bo‘lishi kerak",
+                        D: "ψ-funksiya uzlukli bo‘lishi kerak",
+                    },
+                    correct: "C",
+                },
+                {
+                    question: "Yadroning zaryadi va o‘lchami qanday?",
+                    options: {
+                        A: "Manfiy, 10-5 sm",
+                        B: "Musbat, 10-13 sm",
+                        C: "Musbat, 10-3 sm",
+                        D: "Neytral, 10-6 sm",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "Atomda elektron holatini nechta kvant sonlari xarakterlaydi?",
+                    options: {
+                        A: "p,l – ikkita kvant sonlari xarakterlaydi",
+                        B: "p,l,s – uchta kvant sonlari xarakterlaydi",
+                        C: "n, l, m l , m s – to‘rtta kvant sonlari xarakterlaydi",
+                        D: "n – bitta kvant sonlari xarakterlaydi",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "To‘lqin funksiyasining normalash sharti qanday ma’noga ega?",
+                    options: {
+                        A: "Zarraning mavjudligini va harakati tezligini bildiradi",
+                        B: "Zarraning fazoning biror nuqtasida bo‘lmasligining ehtimolligini bildiradi",
+                        C: "Zarraning fazoning biror nuqtasida bo‘lishi ishonchli hodisa bo‘lib, uning ehtimolligi birga teng bo‘lishini ko‘rsatadi",
+                        D: "Zarraning hajm birligidan chiqib ketishi ishonchli hodisa ekanligini bildiradi",
+                    },
+                    correct: "C",
+                },
+                {
+                    question:
+                        "Yadro beta yemrilishga uchrasa yadro nomeri qanday o’zgaradi?",
+                    options: {
+                        A: "zaryadi 1e ga oshadi",
+                        B: "zaryadi e ga kamayadi",
+                        C: "zaryadi 2e ga ortadi",
+                        D: "zaryadi 2e ga kamayadi",
+                    },
+                    correct: "A",
+                },
+                {
+                    question:
+                        "Yadro alfa yemrilishga uchrasa yadro massa soni qanday o’zgaradi?",
+                    options: {
+                        A: "2 m.a.b ga oshadi",
+                        B: "4 m.a.b ga kamayadi",
+                        C: "3 m.a.b ga ortadi",
+                        D: "3 m.a.b ga kamayadi",
+                    },
+                    correct: "B",
+                },
+                {
+                    question:
+                        "-yemirilish spektrining uzluksiz bo‘lish sababi?",
+                    options: {
+                        A: "Atom elektronlariga beriladi",
+                        B: "Yemirilish energiyasining bir qismi yutiladi",
+                        C: "Energiya bir qismi nurlanadi",
+                        D: "Berilgan javoblar ichida to’g’risi yo’q",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Bitta proton va ikkita neytron atom yadrosiga birlashganda ajralib  chiqadigan energiya   aniqlansin.",
+                    options: {
+                        A: "2.5 MeV",
+                        B: "3.45 MeV",
+                        C: "5.42 MeV",
+                        D: "8.49 MeV",
+                    },
+                    correct: "D",
+                },
+                {
+                    question:
+                        "Uglerod   yadrosining solishtirma bog’lanish energiyasini hisoblang.",
+                    options: {
+                        A: "7,68 MeV/nuk",
+                        B: "5.34 Mev/nuk",
+                        C: "1.23 MeV/nuk",
+                        D: "3.45 MeV/nuk",
+                    },
+                    correct: "A",
+                },
+            ];
+
+            let currentSection = 0,
+                currentQuestions = [],
+                userAnswers = {},
+                currentQuestionIndex = 0;
+            let timerInterval,
+                timeRemaining = 50 * 60,
+                studentFullName = "";
+
+            function showScreen(screenId) {
+                document
+                    .querySelectorAll(".screen")
+                    .forEach((s) => s.classList.remove("active"));
+                document.getElementById(screenId).classList.add("active");
+            }
+
+            function checkPassword(section) {
+                const password = document.getElementById(
+                    "password" + section,
+                ).value;
+                const correctPassword = section === 1 ? "123" : "456";
+                if (password === correctPassword) {
+                    currentSection = section;
+                    document.getElementById("error" + section).style.display =
+                        "none";
+                    document.getElementById("password" + section).value = "";
+                    document.getElementById("sectionNameDisplay").textContent =
+                        section === 1
+                            ? "MEXANIKA va MOLEKULYAR FIZIKA"
+                            : "ELEKTR, OPTIKA, ATOM va YADRO FIZIKASI";
+                    showScreen("nameScreen");
+                } else {
+                    document.getElementById("error" + section).style.display =
+                        "block";
+                }
+            }
+
+            function shuffleArray(array) {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            }
+
+            function shuffleOptions(question) {
+                // Asl to'g'ri javob matnini olish
+                const correctText = question.options[question.correct];
+
+                // Matnlarni aralashtirish
+                const optionTexts = Object.values(question.options);
+                const shuffledTexts = shuffleArray(optionTexts);
+
+                const keys = ["A", "B", "C", "D"];
+                const newOptions = {};
+                let newCorrect = "";
+
+                // Harflarni (A, B, C, D) joyida saqlab, matnlarni almashtiramiz
+                keys.forEach((key, index) => {
+                    newOptions[key] = shuffledTexts[index];
+
+                    // Qaysi variant to'g'ri matnga to'g'ri kelsa o'shani 'correct' deb belgilaymiz
+                    if (shuffledTexts[index] === correctText) {
+                        newCorrect = key;
+                    }
+                });
+
+                return {
+                    ...question,
+                    options: newOptions,
+                    correct: newCorrect,
+                };
+            }
+
+            function startQuiz() {
+                const name = document
+                    .getElementById("studentName")
+                    .value.trim();
+                const surname = document
+                    .getElementById("studentSurname")
+                    .value.trim();
+                if (!name || !surname) {
+                    document.getElementById("nameError").style.display =
+                        "block";
+                    return;
+                }
+
+                document.getElementById("nameError").style.display = "none";
+                studentFullName = name + " " + surname;
+
+                const allQuestions =
+                    currentSection === 1
+                        ? section1Questions
+                        : section2Questions;
+                const shuffled = shuffleArray(allQuestions);
+                currentQuestions = shuffled
+                    .slice(0, 50)
+                    .map((q) => shuffleOptions(q));
+
+                userAnswers = {};
+                currentQuestionIndex = 0;
+                document.getElementById("studentName").value = "";
+                document.getElementById("studentSurname").value = "";
+
+                showScreen("quizScreen");
+                document.getElementById("timer").classList.remove("hidden");
+                startTimer();
+                displayQuestion();
+            }
+
+            function startTimer() {
+                timeRemaining = 50 * 60;
+                updateTimerDisplay();
+                timerInterval = setInterval(() => {
+                    timeRemaining--;
+                    updateTimerDisplay();
+                    if (timeRemaining <= 0) {
+                        clearInterval(timerInterval);
+                        finishQuiz();
+                    }
+                }, 1000);
+            }
+
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                const timerEl = document.getElementById("timer");
+                timerEl.textContent =
+                    String(minutes).padStart(2, "0") +
+                    ":" +
+                    String(seconds).padStart(2, "0");
+                timerEl.classList.remove("warning", "danger");
+                if (timeRemaining <= 300) timerEl.classList.add("danger");
+                else if (timeRemaining <= 600) timerEl.classList.add("warning");
+            }
+
+            function displayQuestion() {
+                const q = currentQuestions[currentQuestionIndex];
+                document.getElementById("questionNumber").textContent =
+                    "Savol " + (currentQuestionIndex + 1) + "/50";
+                document.getElementById("questionText").innerHTML = q.question;
+
+                const optionsContainer =
+                    document.getElementById("optionsContainer");
+                optionsContainer.innerHTML = "";
+
+                Object.entries(q.options).forEach(([key, value]) => {
+                    const optionDiv = document.createElement("div");
+                    optionDiv.className =
+                        "option" +
+                        (userAnswers[currentQuestionIndex] === key
+                            ? " selected"
+                            : "");
+
+                    // Html teglari ishlay olishi uchun innerHTML'ga to'g'ridan to'g'ri value berilmoqda
+                    optionDiv.innerHTML =
+                        '<span class="option-letter">' +
+                        key +
+                        ")</span> " +
+                        value;
+                    optionDiv.onclick = () => selectOption(key);
+                    optionsContainer.appendChild(optionDiv);
+                });
+
+                document.getElementById("progressBar").style.width =
+                    ((currentQuestionIndex + 1) / 50) * 100 + "%";
+                document.getElementById("prevBtn").style.visibility =
+                    currentQuestionIndex === 0 ? "hidden" : "visible";
+                document.getElementById("nextBtn").textContent =
+                    currentQuestionIndex === 49 ? "Yakunlash" : "Keyingi";
+            }
+
+            function selectOption(option) {
+                userAnswers[currentQuestionIndex] = option;
+                displayQuestion();
+            }
+
+            function nextQuestion() {
+                if (currentQuestionIndex < 49) {
+                    currentQuestionIndex++;
+                    displayQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }
+
+            function prevQuestion() {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    displayQuestion();
+                }
+            }
+
+            function finishQuiz() {
+                clearInterval(timerInterval);
+                document.getElementById("timer").classList.add("hidden");
+                let correct = 0,
+                    answered = 0;
+
+                currentQuestions.forEach((q, idx) => {
+                    if (userAnswers[idx]) {
+                        answered++;
+                        if (userAnswers[idx] === q.correct) correct++;
+                    }
+                });
+
+                const percentage = Math.round((correct / 50) * 100);
+                const timeUsed = 50 * 60 - timeRemaining;
+                const minutesUsed = Math.floor(timeUsed / 60);
+                const secondsUsed = timeUsed % 60;
+
+                document.getElementById("resultName").textContent =
+                    studentFullName + " ning natijasi";
+                document.getElementById("resultScore").textContent =
+                    correct + "/50";
+
+                let message = "";
+                if (percentage >= 90) message = "A'lo! Juda yaxshi natija!";
+                else if (percentage >= 70) message = "Yaxshi! Davom eting!";
+                else if (percentage >= 50)
+                    message = "Qoniqarli. Yanada mashq qiling.";
+                else
+                    message =
+                        "Yana harakat qiling. Mashq orqali mukammallikka erishiladi!";
+
+                document.getElementById("resultMessage").textContent = message;
+                document.getElementById("resultDetails").innerHTML =
+                    "<p><strong>To'g'ri javoblar:</strong> " +
+                    correct +
+                    "</p>" +
+                    "<p><strong>Noto'g'ri javoblar:</strong> " +
+                    (50 - correct) +
+                    "</p>" +
+                    "<p><strong>Javobsiz savollar:</strong> " +
+                    (50 - answered) +
+                    "</p>" +
+                    "<p><strong>Foiz:</strong> " +
+                    percentage +
+                    "%</p>" +
+                    "<p><strong>Sarflangan vaqt:</strong> " +
+                    minutesUsed +
+                    " daqiqa " +
+                    secondsUsed +
+                    " soniya</p>";
+
+                showScreen("resultScreen");
+            }
+
+            function resetQuiz() {
+                currentQuestions = [];
+                userAnswers = {};
+                currentQuestionIndex = 0;
+                studentFullName = "";
+                clearInterval(timerInterval);
+                document.getElementById("timer").classList.add("hidden");
+            }
+
+            document
+                .getElementById("password1")
+                .addEventListener("keypress", function (e) {
+                    if (e.key === "Enter") checkPassword(1);
+                });
+            document
+                .getElementById("password2")
+                .addEventListener("keypress", function (e) {
+                    if (e.key === "Enter") checkPassword(2);
+                });
+        </script>
+    </body>
+</html>
 
